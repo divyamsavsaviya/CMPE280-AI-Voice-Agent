@@ -3,15 +3,22 @@ const router = express.Router();
 
 router.post('/ephemeral-key', async (req, res) => {
   try {
+    const { role } = req.body;
+    const context = role || 'General Interview';
+
     const body = {
       model: 'gpt-4o-realtime-preview-2024-10-01',
       voice: 'verse',
-      instructions: `You are a professional interviewer. 
-      Your goal is to conduct a realistic interview. 
-      Ask one question at a time. 
-      Wait for the candidate to respond. 
-      Provide brief, constructive feedback if necessary, but focus on moving the interview forward.
-      Do not be overly verbose. Keep it conversational.`,
+      instructions: `You are a professional interviewer conducting an interview for the role of: ${context}.
+      
+      Your goal is to conduct a realistic, role-specific interview.
+      1. Start by welcoming the candidate to the interview for ${context}.
+      2. Ask relevant technical and behavioral questions suited for a ${context}.
+      3. If a specific company is mentioned in the role (e.g., "Software Engineer at Google"), tailor your questions to that company's known culture and values.
+      4. Ask one question at a time.
+      5. Wait for the candidate to respond.
+      6. Provide brief, constructive feedback if necessary, but focus on moving the interview forward.
+      7. Do not be overly verbose. Keep it conversational and professional.`,
       input_audio_transcription: {
         model: 'whisper-1',
       },

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ControlPanel from './ControlPanel';
+import { Mic, Square, Keyboard, Lightbulb } from 'lucide-react';
+import Visualizer from './Visualizer';
 
-export default function VoiceInterviewer() {
-    const [isSessionActive, setIsSessionActive] = useState(false);
+export default function VoiceInterviewer({ role = 'General Interview' }) {
+    const [step, setStep] = useState('intro'); // intro -> idle -> active
     const [status, setStatus] = useState('Ready');
     const [error, setError] = useState(null);
 
@@ -11,10 +12,14 @@ export default function VoiceInterviewer() {
     const dataChannel = useRef(null);
 
     useEffect(() => {
-        // Cleanup on unmount
-        return () => {
-            stopSession();
-        };
+        if (step === 'intro') {
+            const timer = setTimeout(() => setStep('idle'), 2500);
+            return () => clearTimeout(timer);
+        }
+    }, [step]);
+
+    useEffect(() => {
+        return () => stopSession();
     }, []);
 
     async function startSession() {
@@ -22,49 +27,33 @@ export default function VoiceInterviewer() {
             setStatus('Connecting...');
             setError(null);
 
-            // 1. Get ephemeral key from our backend
             const tokenResponse = await fetch('/api/session/ephemeral-key', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role }),
             });
 
-            if (!tokenResponse.ok) {
-                throw new Error('Failed to get ephemeral key');
-            }
+            if (!tokenResponse.ok) throw new Error('Failed to get ephemeral key');
 
             const data = await tokenResponse.json();
             const EPHEMERAL_KEY = data.client_secret.value;
 
-            // 2. Initialize WebRTC
             peerConnection.current = new RTCPeerConnection();
 
-            // Set up audio element for playback
             audioEl.current = document.createElement('audio');
             audioEl.current.autoplay = true;
             peerConnection.current.ontrack = (e) => {
                 audioEl.current.srcObject = e.streams[0];
             };
 
-            // 3. Add local microphone track
             const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
             peerConnection.current.addTrack(ms.getTracks()[0]);
 
-            // 4. Create Data Channel for events
             dataChannel.current = peerConnection.current.createDataChannel('oai-events');
-            dataChannel.current.addEventListener('message', (e) => {
-                try {
-                    const event = JSON.parse(e.data);
-                    console.log('Received event:', event);
-                    // Handle events like 'response.audio_transcript.done' here for UI updates
-                } catch (err) {
-                    console.error('Error parsing event:', err);
-                }
-            });
 
-            // 5. Create Offer and Set Local Description
             const offer = await peerConnection.current.createOffer();
             await peerConnection.current.setLocalDescription(offer);
 
-            // 6. Connect to OpenAI Realtime API
             const baseUrl = 'https://api.openai.com/v1/realtime';
             const model = 'gpt-4o-realtime-preview-2024-10-01';
             const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
@@ -76,14 +65,10 @@ export default function VoiceInterviewer() {
                 },
             });
 
-            const answer = {
-                type: 'answer',
-                sdp: await sdpResponse.text(),
-            };
-
+            const answer = { type: 'answer', sdp: await sdpResponse.text() };
             await peerConnection.current.setRemoteDescription(answer);
 
-            setIsSessionActive(true);
+            setStep('active');
             setStatus('Connected');
         } catch (err) {
             console.error('Failed to start session:', err);
@@ -98,45 +83,78 @@ export default function VoiceInterviewer() {
             peerConnection.current.close();
             peerConnection.current = null;
         }
-        setIsSessionActive(false);
+        setStep('idle');
         setStatus('Ready');
     }
 
+    if (step === 'intro') {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
+                <div className="text-6xl mb-6 animate-wave origin-bottom-right">👋</div>
+                <h2 className="text-[32px] font-normal text-[#202124] text-center">
+                    Hi! Let's practice an interview for <span className="font-medium">{role}</span>.
+                </h2>
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-700">
-            <div className="flex flex-col items-center gap-6">
-                {/* Status Indicator */}
-                <div className={`px-4 py-1 rounded-full text-sm font-medium ${status === 'Connected' ? 'bg-green-900/50 text-green-400 border border-green-800' :
-                        status === 'Error' ? 'bg-red-900/50 text-red-400 border border-red-800' :
-                            'bg-gray-700 text-gray-300'
-                    }`}>
-                    {status}
+        <div className="w-full max-w-3xl mx-auto animate-slide-up">
+            <div className="bg-white rounded-[24px] p-10 shadow-[0_1px_2px_0_rgba(60,64,67,0.3),0_2px_6px_2px_rgba(60,64,67,0.15)] min-h-[400px] flex flex-col justify-between relative overflow-hidden">
+
+                {/* Header / Question Area */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <span className="bg-[#e8f0fe] text-[#1967d2] px-3 py-1 rounded-md text-sm font-medium">
+                            Background question
+                        </span>
+                        <span className="text-[#5f6368] text-sm font-medium">1/5</span>
+                    </div>
+
+                    <h3 className="text-[28px] leading-snug text-[#202124] font-normal">
+                        Tell me a little about yourself.
+                    </h3>
                 </div>
 
-                {/* Visualizer Placeholder */}
-                <div className="w-full h-48 bg-gray-900 rounded-xl flex items-center justify-center border border-gray-800 relative overflow-hidden">
-                    {isSessionActive ? (
-                        <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className="w-2 h-12 bg-blue-500 rounded-full animate-pulse-slow" style={{ animationDelay: `${i * 0.1}s` }}></div>
-                            ))}
-                        </div>
+                {/* Visualizer Area */}
+                <div className="flex-1 flex items-center justify-center py-12">
+                    <Visualizer isActive={step === 'active'} />
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-4">
+                    {step === 'idle' ? (
+                        <button
+                            onClick={startSession}
+                            className="flex-1 bg-white border border-[#dadce0] hover:bg-[#f8f9fa] text-[#1a73e8] h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all hover:shadow-sm group"
+                        >
+                            <Mic className="w-6 h-6 text-[#1a73e8]" />
+                            Answer
+                        </button>
                     ) : (
-                        <span className="text-gray-600">Start interview to activate</span>
+                        <button
+                            onClick={stopSession}
+                            className="flex-1 bg-[#ea4335] hover:bg-[#d93025] text-white h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all shadow-md"
+                        >
+                            <Square className="w-5 h-5 fill-current" />
+                            End Answer
+                        </button>
                     )}
+
+                    {/* Secondary Actions (Visual only for now) */}
+                    <button className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors">
+                        <Keyboard className="w-6 h-6" />
+                    </button>
+                    <button className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors">
+                        <Lightbulb className="w-6 h-6" />
+                    </button>
                 </div>
 
                 {error && (
-                    <div className="text-red-400 text-sm text-center max-w-md">
+                    <div className="absolute bottom-4 left-0 right-0 text-center text-red-500 text-sm">
                         {error}
                     </div>
                 )}
-
-                <ControlPanel
-                    isSessionActive={isSessionActive}
-                    onStartSession={startSession}
-                    onStopSession={stopSession}
-                />
             </div>
         </div>
     );

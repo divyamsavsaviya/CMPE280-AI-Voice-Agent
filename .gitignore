@@ -53,8 +53,6 @@ client/.cache/
 client/*.local
 
 # Tailwind and PostCSS build artifacts
-client/postcss.config.js
-client/tailwind.config.js
 
 # Vite specific
 client/.vite/
