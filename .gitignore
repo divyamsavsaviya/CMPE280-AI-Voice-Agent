@@ -1,0 +1,93 @@
+# ----------------------------
+# Root
+# ----------------------------
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+dist/
+build/
+coverage/
+.cache/
+tmp/
+temp/
+
+# ----------------------------
+# Client
+# ----------------------------
+client/node_modules/
+client/dist/
+client/build/
+client/.vite/
+client/.parcel-cache/
+client/.next/
+client/.nuxt/
+client/.cache/
+client/*.local
+
+# Tailwind and PostCSS build artifacts
+client/postcss.config.js
+client/tailwind.config.js
+
+# Vite specific
+client/.vite/
+client/vite.config.js.timestamp*
+client/vite.config.ts.timestamp*
+
+# ----------------------------
+# Server
+# ----------------------------
+server/node_modules/
+server/dist/
+server/build/
+server/tmp/
+server/.cache/
+
+# Environment files in server
+server/.env
+server/.env.local
+
+# ----------------------------
+# Miscellaneous
+# ----------------------------
+# Local testing files
+*.local.json
+*.local.yaml
+*.local.yml
+
+# IDE-specific
+*.iml
+
+# Package manager locks (optional)
+# Uncomment if you want to ignore lock files across environments
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# bun.lockb
