@@ -105,6 +105,17 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                 }
             };
 
+            // Kick-off the conversation
+            dataChannel.current.onopen = () => {
+                const responseCreate = {
+                    type: 'response.create',
+                    response: {
+                        modalities: ['text', 'audio'],
+                    }
+                };
+                dataChannel.current.send(JSON.stringify(responseCreate));
+            };
+
             const offer = await peerConnection.current.createOffer();
             await peerConnection.current.setLocalDescription(offer);
 
@@ -180,23 +191,8 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <span className="bg-[#e8f0fe] text-[#1967d2] px-3 py-1 rounded-md text-sm font-medium">
-                            Background question
+                            Phone Screen
                         </span>
-                        <span className="text-[#5f6368] text-sm font-medium" aria-label="Question 1 of 5">1/5</span>
-
-                        {transcript.length > 0 && (
-                            <button
-                                onClick={() => {
-                                    stopSession();
-                                    navigate('/feedback');
-                                }}
-                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition animate-fade-in focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-md px-2 py-1"
-                                aria-label="Finish interview and view report"
-                            >
-                                <CheckCircle className="w-5 h-5" aria-hidden="true" />
-                                Finish & View Report
-                            </button>
-                        )}
                     </div>
 
                     <h1 className="text-[28px] leading-snug text-[#202124] font-normal">
@@ -240,12 +236,15 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                         </button>
                     ) : (
                         <button
-                            onClick={stopSession}
+                            onClick={() => {
+                                stopSession();
+                                navigate('/feedback');
+                            }}
                             className="flex-1 bg-[#ea4335] hover:bg-[#d93025] text-white h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                            aria-label="Stop recording answer"
+                            aria-label="Stop interview and view report"
                         >
                             <Square className="w-5 h-5 fill-current" aria-hidden="true" />
-                            End Answer
+                            End Interview
                         </button>
                     )}
 
@@ -270,6 +269,6 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
