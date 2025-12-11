@@ -7,8 +7,9 @@ router.post('/ephemeral-key', async (req, res) => {
     const context = role || 'General Interview';
 
     const body = {
-      model: 'gpt-4o-realtime-preview-2024-10-01',
-      voice: 'verse',
+      model: 'gpt-4o-realtime-preview',
+      voice: 'alloy',
+      modalities: ['audio', 'text'],
       instructions: `You are a professional interviewer conducting an interview for the role of: ${context}.
       
       Your goal is to conduct a realistic, role-specific interview.
