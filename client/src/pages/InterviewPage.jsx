@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import VoiceInterviewer from '../components/VoiceInterviewer';
 
@@ -16,7 +16,9 @@ const ROLE_LABELS = {
 export default function InterviewPage() {
     const { roleId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const roleLabel = decodeURIComponent(roleId || 'General Interview');
+    const additionalContext = location.state || {}; // { role, experienceLevel, jobDescription, resume }
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -35,7 +37,7 @@ export default function InterviewPage() {
             </header>
 
             <main className="flex-1 flex flex-col items-center justify-center p-4">
-                <VoiceInterviewer role={roleLabel} />
+                <VoiceInterviewer role={roleLabel} initialData={additionalContext} />
             </main>
         </div>
     );

@@ -3,19 +3,27 @@ const router = express.Router();
 
 router.post('/ephemeral-key', async (req, res) => {
   try {
-    const { role } = req.body;
+    const { role, experienceLevel, jobDescription, resume } = req.body;
     const context = role || 'General Interview';
+    const experienceText = experienceLevel ? `Candidate Experience Level: ${experienceLevel}` : '';
+    const jdText = jobDescription ? `\nJob Description:\n${jobDescription}` : '';
+    const resumeText = resume ? `\nCandidate Resume/Summary:\n${resume}` : '';
 
     const body = {
       model: 'gpt-4o-realtime-preview',
       voice: 'alloy',
       modalities: ['audio', 'text'],
       instructions: `You are a professional interviewer conducting an interview for the role of: ${context}.
+      ${experienceText}
+      ${jdText}
+      ${resumeText}
       
-      Your goal is to conduct a realistic, role-specific interview.
+      Your goal is to conduct a realistic, role-specific interview that is tailored to the candidate's level and background.
       1. Start by welcoming the candidate to the interview for ${context}.
-      2. Ask relevant technical and behavioral questions suited for a ${context}.
-      3. If a specific company is mentioned in the role (e.g., "Software Engineer at Google"), tailor your questions to that company's known culture and values.
+      2. Ask relevant technical and behavioral questions suited for a ${context} at the ${experienceLevel || 'specified'} level.
+      3. Use the provided Resume (if any) to ask about specific projects or skills.
+      4. Use the provided Job Description (if any) to align questions with the role requirements.
+      5. If a specific company is mentioned in the role (e.g., "Software Engineer at Google"), tailor your questions to that company's known culture and values.
       4. Ask one question at a time.
       5. Wait for the candidate to respond.
       6. Provide brief, constructive feedback if necessary, but focus on moving the interview forward.
