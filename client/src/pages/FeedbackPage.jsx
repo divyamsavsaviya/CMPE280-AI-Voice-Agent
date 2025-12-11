@@ -92,7 +92,22 @@ const FeedbackPage = () => {
             {/* Sticky Header */}
             <header className="px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-[#f8f9fa]/90 backdrop-blur-sm">
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => {
+                        // CLEANUP ON EXIT: Explicitly clear data when user says they are done
+                        localStorage.removeItem('interview_transcript');
+                        localStorage.removeItem('interview_data');
+                        localStorage.removeItem('interview_role');
+                        localStorage.removeItem('interview_experience');
+                        localStorage.removeItem('current_session_backup');
+
+                        Object.keys(localStorage).forEach((key) => {
+                            if (key.startsWith('completed_session_')) {
+                                localStorage.removeItem(key);
+                            }
+                        });
+
+                        navigate('/');
+                    }}
                     className="flex items-center gap-2 text-[#5f6368] hover:text-[#202124] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
                     aria-label="Back to Home"
                 >

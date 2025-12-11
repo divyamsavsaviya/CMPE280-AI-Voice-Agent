@@ -34,6 +34,20 @@ export default function RoleSelectionPage() {
     ];
 
     useEffect(() => {
+        // CLEANUP ON START: Force clear all interview data to prevent ghost sessions
+        localStorage.removeItem('interview_transcript');
+        localStorage.removeItem('interview_data');
+        localStorage.removeItem('interview_role');
+        localStorage.removeItem('interview_experience');
+        localStorage.removeItem('current_session_backup');
+
+        // Clear any backup keys
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith('completed_session_')) {
+                localStorage.removeItem(key);
+            }
+        });
+
         if (step === 1) {
             const interval = setInterval(() => {
                 setIsFading(true);
