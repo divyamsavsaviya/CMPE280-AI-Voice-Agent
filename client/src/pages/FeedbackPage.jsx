@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BadgeCheck, AlertTriangle, AlertCircle, ArrowLeft, Loader2, Award, Zap, Brain } from 'lucide-react';
+import BadgeCheck from 'lucide-react/dist/esm/icons/badge-check';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import Award from 'lucide-react/dist/esm/icons/award';
+import Zap from 'lucide-react/dist/esm/icons/zap';
+import Brain from 'lucide-react/dist/esm/icons/brain';
 import SmartTranscript from '../components/SmartTranscript';
 
 const FeedbackPage = () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 
 const EXPERIENCE_LEVELS = [
     { id: 'junior', label: 'Junior', sub: '0-2 years' },
