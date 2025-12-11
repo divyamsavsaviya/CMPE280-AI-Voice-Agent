@@ -40,7 +40,8 @@ const FeedbackPage = () => {
                     return;
                 }
 
-                const res = await fetch('http://localhost:3001/api/feedback/analyze', {
+                const apiUrl = import.meta.env.VITE_API_URL || '';
+                const res = await fetch(`${apiUrl}/api/feedback/analyze`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
