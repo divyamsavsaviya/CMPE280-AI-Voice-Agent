@@ -5,7 +5,7 @@ export default function HomePage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 text-center animate-fade-in">
+        <main className="min-h-screen bg-white flex flex-col items-center justify-center p-4 text-center animate-fade-in">
             <div className="max-w-2xl w-full space-y-8">
                 <div className="space-y-2 animate-slide-up" style={{ animationDelay: '0.1s' }}>
                     <h1 className="text-[64px] font-normal text-[#202124] tracking-tight leading-tight">
@@ -34,6 +34,6 @@ export default function HomePage() {
                     </button>
                 </div>
             </div>
-        </div>
+        </main>
     );
 }

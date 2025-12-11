@@ -26,10 +26,14 @@ const parseContent = (htmlString) => {
 };
 
 // Tooltip Component
-const Tooltip = ({ text, children }) => (
+const Tooltip = ({ text, children, id }) => (
     <div className="group relative inline-block">
         {children}
-        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap z-50 shadow-xl pointer-events-none">
+        <div
+            id={id}
+            role="tooltip"
+            className="invisible group-hover:visible group-focus-within:visible opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap z-50 shadow-xl pointer-events-none"
+        >
             {text}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
         </div>
@@ -39,6 +43,8 @@ const Tooltip = ({ text, children }) => (
 // Sub-component for rendering a single message bubble
 const MessageBubble = ({ role, content, parts }) => {
     const isUser = role === 'user';
+    // Unique ID generation for tooltips to ensure valid aria-describedby
+    const baseId = React.useId();
 
     return (
         <div className={`flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -60,11 +66,17 @@ const MessageBubble = ({ role, content, parts }) => {
                             }
 
                             const { markType, suggestion, content } = part;
+                            const tooltipId = `${baseId}-tooltip-${idx}`;
 
                             if (markType === 'filler') {
                                 return (
-                                    <Tooltip key={idx} text="Filler word">
-                                        <span className="bg-[#fef7e0] text-[#b06000] border-b border-[#fef7e0] hover:border-[#b06000] mx-0.5 rounded px-1 transition-colors cursor-help">
+                                    <Tooltip key={idx} text="Filler word" id={tooltipId}>
+                                        <span
+                                            tabIndex="0"
+                                            role="button"
+                                            aria-describedby={tooltipId}
+                                            className="bg-[#fef7e0] text-[#b06000] border-b border-[#fef7e0] hover:border-[#b06000] mx-0.5 rounded px-1 transition-colors cursor-help focus:outline-none focus:ring-2 focus:ring-[#b06000] focus:ring-offset-1"
+                                        >
                                             {content}
                                         </span>
                                     </Tooltip>
@@ -73,8 +85,13 @@ const MessageBubble = ({ role, content, parts }) => {
 
                             if (markType === 'weak') {
                                 return (
-                                    <Tooltip key={idx} text={`Try: ${suggestion}`}>
-                                        <span className="decoration-[#8ab4f8] decoration-2 underline underline-offset-4 cursor-help mx-0.5 text-[#202124] hover:bg-[#e8f0fe] rounded px-0.5 transition-colors">
+                                    <Tooltip key={idx} text={`Try: ${suggestion}`} id={tooltipId}>
+                                        <span
+                                            tabIndex="0"
+                                            role="button"
+                                            aria-describedby={tooltipId}
+                                            className="decoration-[#8ab4f8] decoration-2 underline underline-offset-4 cursor-help mx-0.5 text-[#202124] hover:bg-[#e8f0fe] rounded px-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a73e8] focus:ring-offset-1"
+                                        >
                                             {content}
                                         </span>
                                     </Tooltip>
@@ -83,8 +100,13 @@ const MessageBubble = ({ role, content, parts }) => {
 
                             if (markType === 'critical') {
                                 return (
-                                    <Tooltip key={idx} text={suggestion || "Correction needed"}>
-                                        <span className="bg-[#fce8e6] text-[#c5221f] decoration-wavy underline decoration-[#f28b82] cursor-help mx-0.5 px-1 rounded hover:bg-[#fad2cf] transition-colors">
+                                    <Tooltip key={idx} text={suggestion || "Correction needed"} id={tooltipId}>
+                                        <span
+                                            tabIndex="0"
+                                            role="button"
+                                            aria-describedby={tooltipId}
+                                            className="bg-[#fce8e6] text-[#c5221f] decoration-wavy underline decoration-[#f28b82] cursor-help mx-0.5 px-1 rounded hover:bg-[#fad2cf] transition-colors focus:outline-none focus:ring-2 focus:ring-[#c5221f] focus:ring-offset-1"
+                                        >
                                             {content}
                                         </span>
                                     </Tooltip>

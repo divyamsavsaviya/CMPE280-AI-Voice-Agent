@@ -146,10 +146,18 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
         setStatus('Ready');
     }
 
+    // ... (imports remain the same)
+
+    // ... (component definition and hooks remain the same)
+
+    // ... (useEffect and helper functions remain the same)
+
+    // ... (startSession and stopSession functions remain the same)
+
     if (step === 'intro') {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
-                <div className="text-6xl mb-6 animate-wave origin-bottom-right">👋</div>
+                <div className="text-6xl mb-6 animate-wave origin-bottom-right" aria-hidden="true">👋</div>
                 <h2 className="text-[32px] font-normal text-[#202124] text-center">
                     Hi! Let's practice an interview for <span className="font-medium">{role}</span>.
                 </h2>
@@ -170,7 +178,7 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                         <span className="bg-[#e8f0fe] text-[#1967d2] px-3 py-1 rounded-md text-sm font-medium">
                             Background question
                         </span>
-                        <span className="text-[#5f6368] text-sm font-medium">1/5</span>
+                        <span className="text-[#5f6368] text-sm font-medium" aria-label="Question 1 of 5">1/5</span>
 
                         {transcript.length > 0 && (
                             <button
@@ -178,25 +186,26 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                                     stopSession();
                                     navigate('/feedback');
                                 }}
-                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition animate-fade-in"
+                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition animate-fade-in focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                                aria-label="Finish interview and view report"
                             >
-                                <CheckCircle className="w-5 h-5" />
+                                <CheckCircle className="w-5 h-5" aria-hidden="true" />
                                 Finish & View Report
                             </button>
                         )}
                     </div>
 
-                    <h3 className="text-[28px] leading-snug text-[#202124] font-normal">
+                    <h1 className="text-[28px] leading-snug text-[#202124] font-normal">
                         Tell me a little about yourself.
-                    </h3>
+                    </h1>
                 </div>
 
                 {/* Visualizer Area */}
-                <div className="flex-1 flex flex-col items-center justify-center py-8">
+                <div className="flex-1 flex flex-col items-center justify-center py-8" aria-hidden="true">
                     <Visualizer isActive={step === 'active'} />
 
                     {/* Live Subtitles */}
-                    <div className="mt-8 min-h-[60px] flex items-center justify-center text-center px-4 w-full">
+                    <div className="mt-8 min-h-[60px] flex items-center justify-center text-center px-4 w-full" aria-live="polite" aria-atomic="true">
                         {step === 'active' && lastItem && (
                             <div className="animate-fade-in max-w-2xl">
                                 {lastItem.role === 'user' ? (
@@ -219,32 +228,40 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                     {step === 'idle' ? (
                         <button
                             onClick={startSession}
-                            className="flex-1 bg-white border border-[#dadce0] hover:bg-[#f8f9fa] text-[#1a73e8] h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all hover:shadow-sm group"
+                            className="flex-1 bg-white border border-[#dadce0] hover:bg-[#f8f9fa] text-[#1a73e8] h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all hover:shadow-sm group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            aria-label="Start recording answer"
                         >
-                            <Mic className="w-6 h-6 text-[#1a73e8]" />
+                            <Mic className="w-6 h-6 text-[#1a73e8]" aria-hidden="true" />
                             Answer
                         </button>
                     ) : (
                         <button
                             onClick={stopSession}
-                            className="flex-1 bg-[#ea4335] hover:bg-[#d93025] text-white h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all shadow-md"
+                            className="flex-1 bg-[#ea4335] hover:bg-[#d93025] text-white h-14 rounded-full flex items-center justify-center gap-3 text-lg font-medium transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            aria-label="Stop recording answer"
                         >
-                            <Square className="w-5 h-5 fill-current" />
+                            <Square className="w-5 h-5 fill-current" aria-hidden="true" />
                             End Answer
                         </button>
                     )}
 
                     {/* Secondary Actions (Visual only for now) */}
-                    <button className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors">
-                        <Keyboard className="w-6 h-6" />
+                    <button
+                        className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Open keyboard input"
+                    >
+                        <Keyboard className="w-6 h-6" aria-hidden="true" />
                     </button>
-                    <button className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors">
-                        <Lightbulb className="w-6 h-6" />
+                    <button
+                        className="w-14 h-14 border border-[#dadce0] rounded-full flex items-center justify-center hover:bg-[#f8f9fa] text-[#1a73e8] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Get a hint"
+                    >
+                        <Lightbulb className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 
                 {error && (
-                    <div className="absolute bottom-4 left-0 right-0 text-center text-red-500 text-sm">
+                    <div className="absolute bottom-4 left-0 right-0 text-center text-red-500 text-sm" role="alert">
                         {error}
                     </div>
                 )}

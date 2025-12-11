@@ -69,8 +69,8 @@ const FeedbackPage = () => {
     // Render loading state ONLY if modal is closed AND we are still loading
     if (!showModal && loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 animate-fade-in">
-                <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 animate-fade-in" role="status" aria-busy="true">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" aria-hidden="true" />
                 <h2 className="text-xl font-semibold text-gray-800">Finalizing your report...</h2>
                 <p className="text-gray-500 mt-2">Almost there!</p>
             </div>
@@ -93,16 +93,17 @@ const FeedbackPage = () => {
             <header className="px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-[#f8f9fa]/90 backdrop-blur-sm">
                 <button
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 text-[#5f6368] hover:text-[#202124] transition-colors font-medium"
+                    className="flex items-center gap-2 text-[#5f6368] hover:text-[#202124] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                    aria-label="Back to Home"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-5 h-5" aria-hidden="true" />
                     Back to Home
                 </button>
                 {/* Optional: Add a simple logo or title here if needed, or keep clean */}
                 <div className="w-20" />
             </header>
 
-            <main className={`flex-1 w-full max-w-5xl mx-auto px-6 pb-20 animate-slide-up ${showModal ? 'blur-sm pointer-events-none overflow-hidden h-screen' : ''}`}>
+            <main className={`flex-1 w-full max-w-5xl mx-auto px-6 pb-20 animate-slide-up ${showModal ? 'blur-sm pointer-events-none overflow-hidden h-screen' : ''}`} aria-hidden={showModal}>
 
                 {/* Title Section */}
                 <div className="mb-12 text-center">
@@ -123,11 +124,11 @@ const FeedbackPage = () => {
 
                 {/* Error Banner */}
                 {isError && (
-                    <div className="bg-[#fce8e6] border border-[#f9d3d3] rounded-2xl p-8 text-center mb-8 max-w-3xl mx-auto">
+                    <div className="bg-[#fce8e6] border border-[#f9d3d3] rounded-2xl p-8 text-center mb-8 max-w-3xl mx-auto" role="alert">
                         <div className="w-16 h-16 bg-[#fff8eb] rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span className="text-3xl">⚠️</span>
+                            <span className="text-3xl" aria-hidden="true">⚠️</span>
                         </div>
-                        <h3 className="text-xl font-medium text-[#c5221f] mb-2">Analysis Unavailable</h3>
+                        <h2 className="text-xl font-medium text-[#c5221f] mb-2">Analysis Unavailable</h2>
                         <p className="text-[#3c4043] leading-relaxed">
                             {error || "We couldn't generate a full report due to insufficient speech data, but here is what we recorded."}
                         </p>
@@ -141,21 +142,21 @@ const FeedbackPage = () => {
                             label="Confidence"
                             value={data?.confidenceScore}
                             selfValue={selfScore ? selfScore * 10 : null} // Convert 1-10 to %
-                            icon={<Award className="w-8 h-8 text-[#9334e6]" />}
+                            icon={<Award className="w-8 h-8 text-[#9334e6]" aria-hidden="true" />}
                             color="text-[#9334e6]"
                             bg="bg-[#f3e8fd]"
                         />
                         <MetricCard
                             label="Clarity"
                             value={data?.clarity}
-                            icon={<Zap className="w-8 h-8 text-[#ea8600]" />}
+                            icon={<Zap className="w-8 h-8 text-[#ea8600]" aria-hidden="true" />}
                             color="text-[#ea8600]"
                             bg="bg-[#fef7e0]"
                         />
                         <MetricCard
                             label="Knowledge"
                             value={data?.knowledgeDepth}
-                            icon={<Brain className="w-8 h-8 text-[#1a73e8]" />}
+                            icon={<Brain className="w-8 h-8 text-[#1a73e8]" aria-hidden="true" />}
                             color="text-[#1a73e8]"
                             bg="bg-[#e8f0fe]"
                         />
@@ -224,7 +225,7 @@ const FeedbackPage = () => {
                                     {/* Coach's Note */}
                                     <div className="bg-[#e8f0fe] rounded-[24px] p-8 border border-[#d2e3fc]">
                                         <h3 className="text-[#174ea6] font-medium text-lg mb-4 flex items-center gap-2">
-                                            <div className="bg-white p-1.5 rounded-lg shadow-sm">💡</div> Coach's Note
+                                            <div className="bg-white p-1.5 rounded-lg shadow-sm" aria-hidden="true">💡</div> Coach's Note
                                         </h3>
                                         <p className="text-[#174ea6] text-xl leading-relaxed font-normal">
                                             "{data?.coachNote}"
@@ -259,23 +260,29 @@ const ReflectionModal = ({ onSubmit }) => {
     const [note, setNote] = useState('');
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-md animate-fade-in">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-md animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reflection-title"
+        >
             <div className="bg-white rounded-[24px] shadow-2xl max-w-lg w-full p-8 animate-scale-in border border-gray-100">
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl" aria-hidden="true">
                         🤔
                     </div>
-                    <h2 className="text-2xl font-normal text-[#202124]">Self-Reflection</h2>
+                    <h2 id="reflection-title" className="text-2xl font-normal text-[#202124]">Self-Reflection</h2>
                     <p className="text-[#5f6368] mt-2">While our AI analyzes your session, how do <b>you</b> think it went?</p>
                 </div>
 
                 <div className="space-y-8">
                     {/* Confidence Slider */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
+                        <label htmlFor="confidence-slider" className="block text-sm font-medium text-gray-700 mb-4 text-center">
                             Confidence Level: <span className="text-[#1a73e8] font-bold text-lg ml-1">{score}/10</span>
                         </label>
                         <input
+                            id="confidence-slider"
                             type="range"
                             min="1"
                             max="10"
@@ -283,7 +290,7 @@ const ReflectionModal = ({ onSubmit }) => {
                             onChange={(e) => setScore(Number(e.target.value))}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1a73e8]"
                         />
-                        <div className="flex justify-between text-xs text-gray-400 mt-2 px-1">
+                        <div className="flex justify-between text-xs text-gray-600 mt-2 px-1" aria-hidden="true">
                             <span>Nu uh</span>
                             <span>Aced it</span>
                         </div>
@@ -291,10 +298,11 @@ const ReflectionModal = ({ onSubmit }) => {
 
                     {/* Optional Note */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="reflection-note" className="block text-sm font-medium text-gray-700 mb-2">
                             What went well? (Optional)
                         </label>
                         <textarea
+                            id="reflection-note"
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="I explained the technical concepts clearly..."
@@ -304,7 +312,7 @@ const ReflectionModal = ({ onSubmit }) => {
 
                     <button
                         onClick={() => onSubmit(score)}
-                        className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium py-3.5 rounded-full transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-lg"
+                        className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium py-3.5 rounded-full transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         See AI Feedback
                     </button>
@@ -340,9 +348,9 @@ const MetricCard = ({ label, value, selfValue, icon, color, bg }) => (
 
 const FeedbackCard = ({ type, title, description }) => {
     const styles = {
-        success: { bg: 'bg-[#e6f4ea]', border: 'border-transparent', text: 'text-[#0d652d]', icon: <BadgeCheck className="w-6 h-6 text-[#188038]" /> },
-        warning: { bg: 'bg-[#fef7e0]', border: 'border-transparent', text: 'text-[#b06000]', icon: <AlertTriangle className="w-6 h-6 text-[#ea8600]" /> },
-        critical: { bg: 'bg-[#fce8e6]', border: 'border-transparent', text: 'text-[#c5221f]', icon: <AlertCircle className="w-6 h-6 text-[#d93025]" /> },
+        success: { bg: 'bg-[#e6f4ea]', border: 'border-transparent', text: 'text-[#0d652d]', icon: <BadgeCheck className="w-6 h-6 text-[#188038]" aria-hidden="true" /> },
+        warning: { bg: 'bg-[#fef7e0]', border: 'border-transparent', text: 'text-[#b06000]', icon: <AlertTriangle className="w-6 h-6 text-[#ea8600]" aria-hidden="true" /> },
+        critical: { bg: 'bg-[#fce8e6]', border: 'border-transparent', text: 'text-[#c5221f]', icon: <AlertCircle className="w-6 h-6 text-[#d93025]" aria-hidden="true" /> },
     };
 
     const s = styles[type];
