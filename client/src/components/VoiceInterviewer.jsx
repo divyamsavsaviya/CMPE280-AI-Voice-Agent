@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Square, Keyboard, Lightbulb, CheckCircle } from 'lucide-react';
+import Mic from 'lucide-react/dist/esm/icons/mic';
+import Square from 'lucide-react/dist/esm/icons/square';
+import Keyboard from 'lucide-react/dist/esm/icons/keyboard';
+import Lightbulb from 'lucide-react/dist/esm/icons/lightbulb';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
 import Visualizer from './Visualizer';
 
 export default function VoiceInterviewer({ role = 'General Interview', initialData = {} }) {
