@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Mic, Square, Keyboard, Lightbulb } from 'lucide-react';
 import Visualizer from './Visualizer';
 
-export default function VoiceInterviewer({ role = 'General Interview' }) {
+export default function VoiceInterviewer({ role = 'General Interview', initialData = {} }) {
     const [step, setStep] = useState('intro'); // intro -> idle -> active
     const [status, setStatus] = useState('Ready');
     const [error, setError] = useState(null);
@@ -30,7 +30,7 @@ export default function VoiceInterviewer({ role = 'General Interview' }) {
             const tokenResponse = await fetch('/api/session/ephemeral-key', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role }),
+                body: JSON.stringify({ role, ...initialData }),
             });
 
             if (!tokenResponse.ok) throw new Error('Failed to get ephemeral key');
