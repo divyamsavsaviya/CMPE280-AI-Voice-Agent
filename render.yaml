@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: cmpe280-voice-agent-backend
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: OPENAI_API_KEY
+        sync: false
+    healthCheckPath: /health
+
