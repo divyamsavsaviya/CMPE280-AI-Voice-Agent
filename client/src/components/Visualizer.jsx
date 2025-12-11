@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Visualizer({ isActive }) {
     return (
-        <div className="flex items-center justify-center gap-3 h-16">
+        <div className="flex items-center justify-center gap-3 h-16" aria-hidden="true">
             {isActive ? (
                 <>
                     <div className="w-4 h-4 bg-[#4285f4] rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>

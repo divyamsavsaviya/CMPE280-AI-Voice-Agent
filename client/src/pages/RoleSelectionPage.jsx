@@ -90,6 +90,7 @@ export default function RoleSelectionPage() {
                     )}
                     <input
                         type="text"
+                        aria-label="Enter your current or previous role"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         className="w-full bg-transparent text-[60px] md:text-[80px] text-[#202124] border-none focus:ring-0 focus:outline-none outline-none p-0 font-normal caret-[#1a73e8] selection:bg-[#d2e3fc] selection:text-[#174ea6]"
