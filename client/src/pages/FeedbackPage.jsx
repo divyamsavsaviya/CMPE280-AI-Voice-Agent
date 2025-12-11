@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BadgeCheck, AlertTriangle, AlertCircle, ArrowLeft, Loader2, Award, Zap, Brain } from 'lucide-react';
+import SmartTranscript from '../components/SmartTranscript';
 
 const FeedbackPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(true);
+    const [selfScore, setSelfScore] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -41,7 +44,8 @@ const FeedbackPage = () => {
                 });
 
                 if (!res.ok) {
-                    throw new Error('Failed to fetch analysis');
+                    const errData = await res.json();
+                    throw new Error(errData.message || errData.error || 'Failed to fetch analysis');
                 }
 
                 const result = await res.json();
@@ -57,163 +61,298 @@ const FeedbackPage = () => {
         fetchData();
     }, [navigate]);
 
-    if (loading) {
+    const handleReflectionSubmit = (score) => {
+        setSelfScore(score);
+        setTimeout(() => setShowModal(false), 500); // Small delay for animation
+    };
+
+    // Render loading state ONLY if modal is closed AND we are still loading
+    if (!showModal && loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 animate-fade-in">
                 <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-                <h2 className="text-xl font-semibold text-gray-800">Analyzing your interview...</h2>
-                <p className="text-gray-500 mt-2">Our AI coach is reviewing your answers.</p>
+                <h2 className="text-xl font-semibold text-gray-800">Finalizing your report...</h2>
+                <p className="text-gray-500 mt-2">Almost there!</p>
             </div>
         );
     }
 
-    if (error) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
-                    <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Analysis Failed</h2>
-                    <p className="text-gray-600 mb-6">{error}</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                    >
-                        Return Home
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    // If error, we still want to render the page to show the raw transcript
+    // We just won't show the analytics
+    const isError = !!error || data?.error === 'insufficient_data';
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto space-y-8">
+        <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans relative">
 
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="flex items-center text-gray-500 hover:text-gray-700 mb-2 transition"
-                        >
-                            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Home
-                        </button>
-                        <h1 className="text-3xl font-bold text-gray-900">Post-Interview Report</h1>
-                        <p className="text-gray-500 mt-1">AI-driven analysis of your recent session</p>
-                    </div>
+            {/* REFLECTION MODAL */}
+            {showModal && (
+                <ReflectionModal onSubmit={handleReflectionSubmit} />
+            )}
 
-                    <div className="bg-white px-6 py-3 rounded-full shadow-sm border border-gray-100 flex items-center gap-3">
-                        <span className="text-sm text-gray-400 font-medium uppercase tracking-wider">Level Achieved</span>
-                        <span className={`text-lg font-bold ${data?.competencyBand === 'Advanced' ? 'text-green-600' :
-                                data?.competencyBand === 'Intermediate' ? 'text-blue-600' : 'text-gray-600'
-                            }`}>
-                            {data?.competencyBand || 'Pending'}
-                        </span>
-                    </div>
-                </div>
+            {/* Sticky Header */}
+            <header className="px-6 py-4 flex items-center justify-between sticky top-0 z-10 bg-[#f8f9fa]/90 backdrop-blur-sm">
+                <button
+                    onClick={() => navigate('/')}
+                    className="flex items-center gap-2 text-[#5f6368] hover:text-[#202124] transition-colors font-medium"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                    Back to Home
+                </button>
+                {/* Optional: Add a simple logo or title here if needed, or keep clean */}
+                <div className="w-20" />
+            </header>
 
-                {/* Metrics Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <MetricCard
-                        label="Confidence"
-                        value={data?.confidenceScore}
-                        icon={<Award className="w-6 h-6 text-purple-600" />}
-                        color="text-purple-600"
-                        bg="bg-purple-50"
-                    />
-                    <MetricCard
-                        label="Clarity"
-                        value={data?.clarity}
-                        icon={<Zap className="w-6 h-6 text-yellow-600" />}
-                        color="text-yellow-600"
-                        bg="bg-yellow-50"
-                    />
-                    <MetricCard
-                        label="Knowledge Depth"
-                        value={data?.knowledgeDepth}
-                        icon={<Brain className="w-6 h-6 text-blue-600" />}
-                        color="text-blue-600"
-                        bg="bg-blue-50"
-                    />
-                </div>
+            <main className={`flex-1 w-full max-w-5xl mx-auto px-6 pb-20 animate-slide-up ${showModal ? 'blur-sm pointer-events-none overflow-hidden h-screen' : ''}`}>
 
-                {/* Traffic Light Feedback */}
-                <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Detailed Feedback</h2>
-
-                    <div className="grid gap-4">
-                        {/* Green / Success */}
-                        {data?.feedbackPoints?.filter(f => f.type === 'success').map((point, idx) => (
-                            <FeedbackCard key={`success-${idx}`} type="success" title={point.title} description={point.description} />
-                        ))}
-
-                        {/* Yellow / Warning */}
-                        {data?.feedbackPoints?.filter(f => f.type === 'warning').map((point, idx) => (
-                            <FeedbackCard key={`warning-${idx}`} type="warning" title={point.title} description={point.description} />
-                        ))}
-
-                        {/* Red / Critical */}
-                        {data?.feedbackPoints?.filter(f => f.type === 'critical').map((point, idx) => (
-                            <FeedbackCard key={`critical-${idx}`} type="critical" title={point.title} description={point.description} />
-                        ))}
-                    </div>
-                </div>
-
-                {/* STAR Method Check */}
-                {data?.starMethod !== undefined && (
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-800">STAR Method Usage</h3>
-                            <p className="text-gray-500 text-sm">Did you follow the Situation-Task-Action-Result format?</p>
+                {/* Title Section */}
+                <div className="mb-12 text-center">
+                    <h1 className="text-[40px] leading-tight font-normal text-[#202124] mb-3">
+                        Interview Report
+                    </h1>
+                    {!isError && (
+                        <div className="inline-flex items-center gap-3 bg-white px-6 py-2 rounded-full shadow-sm border border-[#dadce0]">
+                            <span className="text-sm text-[#5f6368] font-medium uppercase tracking-wider">Level</span>
+                            <span className={`text-lg font-bold ${data?.competencyBand === 'Advanced' ? 'text-[#188038]' :
+                                data?.competencyBand === 'Intermediate' ? 'text-[#1a73e8]' : 'text-[#5f6368]'
+                                }`}>
+                                {data?.competencyBand || 'Pending'}
+                            </span>
                         </div>
-                        <div className={`px-4 py-2 rounded-full font-bold bg-gray-50 ${data.starMethod ? 'text-green-600' : 'text-orange-500'}`}>
-                            {data.starMethod ? 'Yes, well done!' : 'Needs Improvement'}
+                    )}
+                </div>
+
+                {/* Error Banner */}
+                {isError && (
+                    <div className="bg-[#fce8e6] border border-[#f9d3d3] rounded-2xl p-8 text-center mb-8 max-w-3xl mx-auto">
+                        <div className="w-16 h-16 bg-[#fff8eb] rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-3xl">⚠️</span>
                         </div>
+                        <h3 className="text-xl font-medium text-[#c5221f] mb-2">Analysis Unavailable</h3>
+                        <p className="text-[#3c4043] leading-relaxed">
+                            {error || "We couldn't generate a full report due to insufficient speech data, but here is what we recorded."}
+                        </p>
                     </div>
                 )}
 
-                {/* Coach's Note */}
-                <div className="bg-blue-50 rounded-2xl p-8 border border-blue-100">
-                    <h3 className="text-blue-900 font-bold text-lg mb-2 flex items-center gap-2">
-                        <span className="bg-blue-200 p-1.5 rounded-md">💡</span> Coach's Note
-                    </h3>
-                    <p className="text-blue-800 text-lg leading-relaxed">
-                        "{data?.coachNote}"
-                    </p>
+                {/* Metrics Grid */}
+                {!isError && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <MetricCard
+                            label="Confidence"
+                            value={data?.confidenceScore}
+                            selfValue={selfScore ? selfScore * 10 : null} // Convert 1-10 to %
+                            icon={<Award className="w-8 h-8 text-[#9334e6]" />}
+                            color="text-[#9334e6]"
+                            bg="bg-[#f3e8fd]"
+                        />
+                        <MetricCard
+                            label="Clarity"
+                            value={data?.clarity}
+                            icon={<Zap className="w-8 h-8 text-[#ea8600]" />}
+                            color="text-[#ea8600]"
+                            bg="bg-[#fef7e0]"
+                        />
+                        <MetricCard
+                            label="Knowledge"
+                            value={data?.knowledgeDepth}
+                            icon={<Brain className="w-8 h-8 text-[#1a73e8]" />}
+                            color="text-[#1a73e8]"
+                            bg="bg-[#e8f0fe]"
+                        />
+                    </div>
+                )}
+
+                {/* Main Content Area */}
+                <div className="space-y-8">
+
+                    {/* Transcript Card */}
+                    <div className="bg-white rounded-[24px] p-8 md:p-10 shadow-sm border border-[#dadce0]">
+                        <h2 className="text-[28px] font-normal text-[#202124] mb-6">Transcript Analysis</h2>
+
+                        {data?.annotatedConversation ? (
+                            <SmartTranscript conversation={data.annotatedConversation} />
+                        ) : (
+                            <div className="text-lg leading-relaxed text-[#3c4043]">
+                                {/* Fallback for raw transcript - BUT GROUPED! */}
+                                <SmartTranscript conversation={(() => {
+                                    const raw = JSON.parse(localStorage.getItem('interview_transcript') || '[]');
+                                    if (raw.length === 0) return [];
+
+                                    // Client-side grouping fallback
+                                    const grouped = [];
+                                    if (raw.length > 0) {
+                                        let current = { ...raw[0] };
+                                        for (let i = 1; i < raw.length; i++) {
+                                            if (raw[i].role === current.role) {
+                                                current.content = (current.content || current.text || '') + ' ' + (raw[i].content || raw[i].text || '');
+                                            } else {
+                                                grouped.push(current);
+                                                current = { ...raw[i] };
+                                            }
+                                        }
+                                        grouped.push(current);
+                                    }
+
+                                    // Normalize content/text field
+                                    return grouped.map(m => ({
+                                        role: m.role,
+                                        content: m.content || m.text || ''
+                                    }));
+                                })()} />
+
+                                {(!localStorage.getItem('interview_transcript') || JSON.parse(localStorage.getItem('interview_transcript')).length === 0) && (
+                                    <p className="text-[#5f6368] italic">No speech recorded.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Detailed Feedback & Coach Note */}
+                    {!isError && (
+                        <>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                {/* Feedback Points */}
+                                <div className="space-y-4">
+                                    <h2 className="text-[24px] font-normal text-[#202124] mb-4 pl-2">Key Feedback</h2>
+                                    {data?.feedbackPoints?.map((point, idx) => (
+                                        <FeedbackCard key={idx} type={point.type} title={point.title} description={point.description} />
+                                    ))}
+                                </div>
+
+                                {/* Coach Note & STAR */}
+                                <div className="space-y-6">
+                                    {/* Coach's Note */}
+                                    <div className="bg-[#e8f0fe] rounded-[24px] p-8 border border-[#d2e3fc]">
+                                        <h3 className="text-[#174ea6] font-medium text-lg mb-4 flex items-center gap-2">
+                                            <div className="bg-white p-1.5 rounded-lg shadow-sm">💡</div> Coach's Note
+                                        </h3>
+                                        <p className="text-[#174ea6] text-xl leading-relaxed font-normal">
+                                            "{data?.coachNote}"
+                                        </p>
+                                    </div>
+
+                                    {/* STAR Method */}
+                                    {data?.starMethod !== undefined && (
+                                        <div className="bg-white rounded-[24px] p-8 border border-[#dadce0] flex items-center justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-medium text-[#202124]">STAR Method</h3>
+                                                <p className="text-[#5f6368] text-sm mt-1">Structured Answer Format</p>
+                                            </div>
+                                            <div className={`px-4 py-2 rounded-full font-medium ${data.starMethod ? 'bg-[#e6f4ea] text-[#137333]' : 'bg-[#fce8e6] text-[#c5221f]'}`}>
+                                                {data.starMethod ? 'Followed' : 'Missed'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                </div>
+            </main>
+        </div>
+    );
+};
+
+const ReflectionModal = ({ onSubmit }) => {
+    const [score, setScore] = useState(5);
+    const [note, setNote] = useState('');
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-md animate-fade-in">
+            <div className="bg-white rounded-[24px] shadow-2xl max-w-lg w-full p-8 animate-scale-in border border-gray-100">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                        🤔
+                    </div>
+                    <h2 className="text-2xl font-normal text-[#202124]">Self-Reflection</h2>
+                    <p className="text-[#5f6368] mt-2">While our AI analyzes your session, how do <b>you</b> think it went?</p>
                 </div>
 
+                <div className="space-y-8">
+                    {/* Confidence Slider */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
+                            Confidence Level: <span className="text-[#1a73e8] font-bold text-lg ml-1">{score}/10</span>
+                        </label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={score}
+                            onChange={(e) => setScore(Number(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1a73e8]"
+                        />
+                        <div className="flex justify-between text-xs text-gray-400 mt-2 px-1">
+                            <span>Nu uh</span>
+                            <span>Aced it</span>
+                        </div>
+                    </div>
+
+                    {/* Optional Note */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            What went well? (Optional)
+                        </label>
+                        <textarea
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            placeholder="I explained the technical concepts clearly..."
+                            className="w-full p-4 border border-[#dadce0] rounded-xl focus:border-[#1a73e8] focus:ring-2 focus:ring-blue-100 transition outline-none resize-none text-gray-700 bg-gray-50 h-24"
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => onSubmit(score)}
+                        className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium py-3.5 rounded-full transition-all shadow-md hover:shadow-lg active:scale-[0.98] text-lg"
+                    >
+                        See AI Feedback
+                    </button>
+
+                </div>
             </div>
         </div>
     );
 };
 
-const MetricCard = ({ label, value, icon, color, bg }) => (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 transition hover:shadow-md">
-        <div className={`p-4 rounded-xl ${bg}`}>
+const MetricCard = ({ label, value, selfValue, icon, color, bg }) => (
+    <div className="bg-white p-8 rounded-[24px] border border-[#dadce0] flex flex-col items-center text-center transition hover:border-[#1a73e8] hover:shadow-md relative overflow-hidden">
+
+        {/* Connection Line / Comparison */}
+        {selfValue && label === 'Confidence' && (
+            <div className="absolute top-4 right-4 flex flex-col items-end">
+                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">You vs AI</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-sm font-bold text-gray-400">{selfValue}%</span>
+                    <span className="text-gray-300">/</span>
+                    <span className={`text-sm font-bold ${color}`}>{value}%</span>
+                </div>
+            </div>
+        )}
+
+        <div className={`p-4 rounded-full ${bg} mb-4`}>
             {icon}
         </div>
-        <div>
-            <p className="text-gray-400 text-sm font-medium uppercase tracking-wide">{label}</p>
-            <p className={`text-3xl font-extrabold ${color}`}>{value}%</p>
-        </div>
+        <p className="text-[#5f6368] text-xs font-medium uppercase tracking-widest mb-1">{label}</p>
+        <p className={`text-[42px] font-normal ${color}`}>{value}%</p>
     </div>
 );
 
 const FeedbackCard = ({ type, title, description }) => {
     const styles = {
-        success: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', icon: <BadgeCheck className="w-6 h-6 text-green-600 flex-shrink-0" /> },
-        warning: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', icon: <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0" /> },
-        critical: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0" /> },
+        success: { bg: 'bg-[#e6f4ea]', border: 'border-transparent', text: 'text-[#0d652d]', icon: <BadgeCheck className="w-6 h-6 text-[#188038]" /> },
+        warning: { bg: 'bg-[#fef7e0]', border: 'border-transparent', text: 'text-[#b06000]', icon: <AlertTriangle className="w-6 h-6 text-[#ea8600]" /> },
+        critical: { bg: 'bg-[#fce8e6]', border: 'border-transparent', text: 'text-[#c5221f]', icon: <AlertCircle className="w-6 h-6 text-[#d93025]" /> },
     };
 
     const s = styles[type];
 
     return (
-        <div className={`${s.bg} border ${s.border} p-5 rounded-xl flex gap-4 items-start`}>
-            <div className="mt-1">{s.icon}</div>
+        <div className={`bg-white border border-[#dadce0] p-6 rounded-[20px] flex gap-4 items-start shadow-sm`}>
+            <div className={`mt-0.5 p-2 rounded-full ${s.bg}`}>{s.icon}</div>
             <div>
-                <h4 className={`font-bold ${s.text} text-lg`}>{title}</h4>
-                <p className={`${s.text} opacity-90 leading-relaxed`}>{description}</p>
+                <h4 className={`font-medium text-[#202124] text-lg mb-1`}>{title}</h4>
+                <p className="text-[#5f6368] leading-relaxed text-sm">{description}</p>
             </div>
         </div>
     );

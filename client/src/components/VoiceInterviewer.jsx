@@ -28,9 +28,20 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
     }, []);
 
     const updateTranscript = (role, text) => {
-        const newItem = { role, text, timestamp: Date.now() };
-        transcriptRef.current = [...transcriptRef.current, newItem];
-        setTranscript(transcriptRef.current);
+        const currentList = transcriptRef.current;
+        const lastItem = currentList[currentList.length - 1];
+
+        if (lastItem && lastItem.role === role) {
+            // MERGE: Append text to the last item if same speaker
+            lastItem.text += ' ' + text;
+            // distinct update to trigger re-render
+            setTranscript([...currentList]);
+        } else {
+            // NEW ITEM
+            const newItem = { role, text, timestamp: Date.now() };
+            transcriptRef.current = [...currentList, newItem];
+            setTranscript(transcriptRef.current);
+        }
 
         // Auto-Save Safety
         localStorage.setItem('current_session_backup', JSON.stringify(transcriptRef.current));
@@ -167,7 +178,7 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                                     stopSession();
                                     navigate('/feedback');
                                 }}
-                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition"
+                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition animate-fade-in"
                             >
                                 <CheckCircle className="w-5 h-5" />
                                 Finish & View Report
