@@ -15,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/session", sessionRoutes);
+app.use("/api/feedback", require("./routes/feedback"));
 
 // Health check
 app.get("/health", (req, res) => {

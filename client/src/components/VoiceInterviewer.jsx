@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, Square, Keyboard, Lightbulb } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mic, Square, Keyboard, Lightbulb, CheckCircle } from 'lucide-react';
 import Visualizer from './Visualizer';
 
 export default function VoiceInterviewer({ role = 'General Interview', initialData = {} }) {
+    const navigate = useNavigate();
     const [step, setStep] = useState('intro'); // intro -> idle -> active
     const [status, setStatus] = useState('Ready');
     const [error, setError] = useState(null);
@@ -38,6 +40,12 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
         try {
             setStatus('Connecting...');
             setError(null);
+
+            // Save context for the report
+            localStorage.setItem('interview_role', role);
+            if (initialData.experienceLevel) {
+                localStorage.setItem('interview_experience', initialData.experienceLevel);
+            }
 
             const tokenResponse = await fetch('/api/session/ephemeral-key', {
                 method: 'POST',
@@ -111,8 +119,11 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
 
     function stopSession() {
         // Session Conclusion: Save full transcript and clear backup
+        // Session Conclusion: Save full transcript and clear backup
         if (transcriptRef.current.length > 0) {
-            localStorage.setItem(`completed_session_${Date.now()}`, JSON.stringify(transcriptRef.current));
+            const data = JSON.stringify(transcriptRef.current);
+            localStorage.setItem(`completed_session_${Date.now()}`, data);
+            localStorage.setItem('interview_transcript', data); // For the feedback page
             localStorage.removeItem('current_session_backup');
         }
 
@@ -149,6 +160,19 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                             Background question
                         </span>
                         <span className="text-[#5f6368] text-sm font-medium">1/5</span>
+
+                        {transcript.length > 0 && (
+                            <button
+                                onClick={() => {
+                                    stopSession();
+                                    navigate('/feedback');
+                                }}
+                                className="ml-4 flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition"
+                            >
+                                <CheckCircle className="w-5 h-5" />
+                                Finish & View Report
+                            </button>
+                        )}
                     </div>
 
                     <h3 className="text-[28px] leading-snug text-[#202124] font-normal">
