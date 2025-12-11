@@ -7,6 +7,9 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
     const [status, setStatus] = useState('Ready');
     const [error, setError] = useState(null);
 
+    const [transcript, setTranscript] = useState([]);
+    const transcriptRef = useRef([]);
+
     const peerConnection = useRef(null);
     const audioEl = useRef(null);
     const dataChannel = useRef(null);
@@ -21,6 +24,15 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
     useEffect(() => {
         return () => stopSession();
     }, []);
+
+    const updateTranscript = (role, text) => {
+        const newItem = { role, text, timestamp: Date.now() };
+        transcriptRef.current = [...transcriptRef.current, newItem];
+        setTranscript(transcriptRef.current);
+
+        // Auto-Save Safety
+        localStorage.setItem('current_session_backup', JSON.stringify(transcriptRef.current));
+    };
 
     async function startSession() {
         try {
@@ -51,6 +63,25 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
 
             dataChannel.current = peerConnection.current.createDataChannel('oai-events');
 
+            // Real-time Event Listener
+            dataChannel.current.onmessage = (e) => {
+                try {
+                    const event = JSON.parse(e.data);
+
+                    if (event.type === 'conversation.item.input_audio_transcription.completed') {
+                        // User's speech
+                        const text = event.transcript;
+                        if (text) updateTranscript('user', text);
+                    } else if (event.type === 'response.audio_transcript.done') {
+                        // AI's speech
+                        const text = event.transcript;
+                        if (text) updateTranscript('assistant', text);
+                    }
+                } catch (err) {
+                    console.error('Error parsing event:', err);
+                }
+            };
+
             const offer = await peerConnection.current.createOffer();
             await peerConnection.current.setLocalDescription(offer);
 
@@ -79,6 +110,12 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
     }
 
     function stopSession() {
+        // Session Conclusion: Save full transcript and clear backup
+        if (transcriptRef.current.length > 0) {
+            localStorage.setItem(`completed_session_${Date.now()}`, JSON.stringify(transcriptRef.current));
+            localStorage.removeItem('current_session_backup');
+        }
+
         if (peerConnection.current) {
             peerConnection.current.close();
             peerConnection.current = null;
@@ -97,6 +134,9 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
             </div>
         );
     }
+
+    // Get the last item to display as a subtitle
+    const lastItem = transcript.length > 0 ? transcript[transcript.length - 1] : null;
 
     return (
         <div className="w-full max-w-3xl mx-auto animate-slide-up">
@@ -117,8 +157,26 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                 </div>
 
                 {/* Visualizer Area */}
-                <div className="flex-1 flex items-center justify-center py-12">
+                <div className="flex-1 flex flex-col items-center justify-center py-8">
                     <Visualizer isActive={step === 'active'} />
+
+                    {/* Live Subtitles */}
+                    <div className="mt-8 min-h-[60px] flex items-center justify-center text-center px-4 w-full">
+                        {step === 'active' && lastItem && (
+                            <div className="animate-fade-in max-w-2xl">
+                                {lastItem.role === 'user' ? (
+                                    <p className="text-2xl font-medium text-blue-600">
+                                        <span className="text-sm uppercase tracking-wide opacity-70 block mb-1 text-center">You said</span>
+                                        "{lastItem.text}"
+                                    </p>
+                                ) : (
+                                    <p className="text-2xl font-medium text-gray-600">
+                                        {lastItem.text}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Controls */}
