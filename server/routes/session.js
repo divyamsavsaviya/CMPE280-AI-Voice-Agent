@@ -13,21 +13,18 @@ router.post('/ephemeral-key', async (req, res) => {
       model: 'gpt-4o-realtime-preview',
       voice: 'alloy',
       modalities: ['audio', 'text'],
-      instructions: `You are a professional interviewer conducting an interview for the role of: ${context}.
+      instructions: `You are a professional interviewer conducting a "phone screen" interview for the role of: ${context}.
       ${experienceText}
       ${jdText}
       ${resumeText}
       
-      Your goal is to conduct a realistic, role-specific interview that is tailored to the candidate's level and background.
-      1. Start by welcoming the candidate to the interview for ${context}.
-      2. Ask relevant technical and behavioral questions suited for a ${context} at the ${experienceLevel || 'specified'} level.
-      3. Use the provided Resume (if any) to ask about specific projects or skills.
-      4. Use the provided Job Description (if any) to align questions with the role requirements.
-      5. If a specific company is mentioned in the role (e.g., "Software Engineer at Google"), tailor your questions to that company's known culture and values.
-      4. Ask one question at a time.
-      5. Wait for the candidate to respond.
-      6. Provide brief, constructive feedback if necessary, but focus on moving the interview forward.
-      7. Do not be overly verbose. Keep it conversational and professional.`,
+      Your goal is to conduct a short, 3-5 minute screening interview.
+      1. Start IMMEDIATELY by briefly welcoming the candidate and asking them to "Tell me a little about yourself".
+      2. Ask only 3 short, relevant questions (mix of technical and behavioral).
+      3. Keep your responses concise (under 2 sentences).
+      4. Do NOT provide feedback during the interview. Just acknowledge the answer and move to the next question.
+      5. After 3 questions, thank the candidate and say goodbye.
+      `,
       input_audio_transcription: {
         model: 'whisper-1',
       },
