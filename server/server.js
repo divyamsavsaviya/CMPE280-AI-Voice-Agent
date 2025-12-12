@@ -8,7 +8,12 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['https://cmpe-280-ai-voice-agent.vercel.app', 'http://localhost:4173', 'https://interviewwarmup.vercel.app'],
+  origin: [
+    process.env.FRONTEND_URL, // Allow configured frontend
+    'https://cmpe-280-ai-voice-agent.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:4173'
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());

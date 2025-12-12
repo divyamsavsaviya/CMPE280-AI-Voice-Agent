@@ -62,7 +62,8 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                 localStorage.setItem('interview_experience', initialData.experienceLevel);
             }
 
-            const tokenResponse = await fetch('/api/session/ephemeral-key', {
+            const backendUrl = import.meta.env.VITE_API_URL || '';
+            const tokenResponse = await fetch(`${backendUrl}/api/session/ephemeral-key`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role, ...initialData }),
