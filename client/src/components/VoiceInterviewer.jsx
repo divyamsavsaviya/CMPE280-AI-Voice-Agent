@@ -195,9 +195,6 @@ export default function VoiceInterviewer({ role = 'General Interview', initialDa
                         </span>
                     </div>
 
-                    <h1 className="text-[28px] leading-snug text-[#202124] font-normal">
-                        Tell me a little about yourself.
-                    </h1>
                 </div>
 
                 {/* Visualizer Area */}
