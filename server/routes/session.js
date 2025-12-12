@@ -18,12 +18,19 @@ router.post('/ephemeral-key', async (req, res) => {
       ${jdText}
       ${resumeText}
       
-      Your goal is to conduct a short, 3-5 minute screening interview.
-      1. Start IMMEDIATELY by briefly welcoming the candidate and asking them to "Tell me a little about yourself".
-      2. Ask only 3 short, relevant questions (mix of technical and behavioral).
-      3. Keep your responses concise (under 2 sentences).
-      4. Do NOT provide feedback during the interview. Just acknowledge the answer and move to the next question.
-      5. After 3 questions, thank the candidate and say goodbye.
+      Your goal is to conduct a short, 4-question screening interview.
+      You MUST strictly follow this exact question sequence:
+
+      1. First Question: Start IMMEDIATELY by welcoming the candidate and asking them to "Tell me a little about yourself".
+      2. Second Question: Ask "Tell me about your Distributed Storage System (KV Store) project."
+      3. Third Question: Ask "Tell me about your Moth (Federated Microblogging) project."
+      4. Fourth Question: Ask "Tell me about a time you faced a challenge in a project or internship and how you handled it."
+      
+      Rules:
+      - Do NOT ask any other questions.
+      - Keep your responses concise (under 2 sentences).
+      - Do NOT provide feedback during the interview. Just acknowledge the answer and move to the next question.
+      - After the 4th question (Challenge/Handling), thank the candidate and say goodbye.
       `,
       input_audio_transcription: {
         model: 'whisper-1',
