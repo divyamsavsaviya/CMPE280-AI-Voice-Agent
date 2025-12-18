@@ -35,7 +35,6 @@ router.post('/ephemeral-key', async (req, res) => {
         silence_duration_ms: 500,
       }
     };
-console.log(process.env.OPENAI_API_KEY, 'OPENAI_API_KEY');
     const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
       method: 'POST',
       headers: {
